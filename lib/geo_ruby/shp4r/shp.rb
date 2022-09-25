@@ -41,7 +41,7 @@ module GeoRuby
           fail MalformedShpException.new("Missing one of shp, dbf or shx for: #{@file}")
         end
 
-        @dbf = Dbf::Reader.open(@file_root + '.dbf')
+        @dbf = DBF::Reader.open(@file_root + '.dbf')
         @shx = File.open(@file_root + '.shx', 'rb')
         @shp = File.open(@file_root + '.shp', 'rb')
         read_index
@@ -67,7 +67,7 @@ module GeoRuby
       end
 
       # create a new Shapefile of the specified shp type (see ShpType) and
-      # with the attribute specified in the +fields+ array (see Dbf::Field).
+      # with the attribute specified in the +fields+ array (see DBF::Field).
       # If a block is given, the ShpFile object newly created is passed to it.
       def self.create(file, shp_type, fields, &proc)
         file_root = file.gsub(/.shp$/i, '')

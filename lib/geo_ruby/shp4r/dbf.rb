@@ -4,30 +4,29 @@ require 'rubygems'
 begin
   require 'dbf'
 rescue LoadError
-  puts "You've loaded GeoRuby SHP Support."
-  puts "Please install the gem 'dbf' to use it. `gem install dbf`"
+  puts 'You\'ve loaded GeoRuby SHP Support.'
+  puts 'Please install the gem "dbf" to use it. `gem install dbf`'
 end
 
 module GeoRuby
   # Ruby .shp files
   module Shp4r
-    Dbf = DBF
 
-    module Dbf
+    module DBF
       class Record
         def [](v)
           attributes[v]
         end
       end
 
-      class Field < Column::Base
-        def initialize(name, type, length, decimal = 0, version = 1, enc = nil)
-          super(name, type, length, decimal, version, enc)
-        end
-      end
+      # class Field < Column::Base
+      #   def initialize(name, type, length, decimal = 0, version = 1, enc = nil)
+      #     super(name, type, length, decimal, version, enc)
+      #   end
+      # end
 
       # Main DBF File Reader
-      class Reader < Table
+      class Reader < ::DBF::Table
         alias_method :fields, :columns
         def header_length
           @columns_count
