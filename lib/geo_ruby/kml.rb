@@ -18,6 +18,7 @@ module GeoRuby
     # argument should be a valid kml geometry fragment ie. <Point> .... </Point>
     # returns the GeoRuby geometry object back
     def parse(kml)
+      polygons = []
       @factory.reset
       @with_z = false
       @parser = REXML::Parsers::PullParser.new(kml)
@@ -33,6 +34,9 @@ module GeoRuby
         elsif e.end_element?
           if ELEMENT_MAP[e[0]]
             @factory.end_geometry(@with_z)
+            if @factory.geometry.class.to_s == 'GeoRuby::SimpleFeatures::Polygon'
+              polygons.push(@factory.geometry.dup)
+            end
             @buffer = '' # clear the buffer
           else
             accumulate_end(e)
@@ -47,7 +51,7 @@ module GeoRuby
           accumulate_cdata(e)
         end
       end
-      @factory.geometry.dup
+      polygons
     end
 
     private
