@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rexml/parsers/pullparser'
 module GeoRuby
   class KmlParser
@@ -7,7 +9,7 @@ module GeoRuby
       'LinearRing' => SimpleFeatures::LinearRing,
       'Polygon' => SimpleFeatures::Polygon,
       'MultiGeometry' => SimpleFeatures::GeometryCollection
-    }
+    }.freeze
 
     def initialize(factory)
       @factory = factory
@@ -27,7 +29,7 @@ module GeoRuby
           if (type = ELEMENT_MAP[e[0]])
             @factory.begin_geometry(type)
           else
-            @buffer = '' if (e[0] == 'coordinates') # clear the buffer
+            @buffer = '' if e[0] == 'coordinates' # clear the buffer
             accumulate_start(e)
           end
         elsif e.end_element?
@@ -36,7 +38,7 @@ module GeoRuby
             @buffer = '' # clear the buffer
           else
             accumulate_end(e)
-            if (e[0] == 'coordinates')
+            if e[0] == 'coordinates'
               parse_coordinates(@buffer)
               @buffer = '' # clear the buffer
             end
@@ -62,9 +64,7 @@ module GeoRuby
 
     def accumulate_start(e)
       @buffer << "<#{e[0]}"
-      if (e[1].class == Hash)
-        e[1].each_pair { |k, v| @buffer << " #{k}='#{v}'" }
-      end
+      e[1].each_pair { |k, v| @buffer << " #{k}='#{v}'" } if e[1].class == Hash
       @buffer << '>'
     end
 
@@ -73,23 +73,24 @@ module GeoRuby
     end
 
     def parse_coordinates(buffer)
-      if buffer =~ /<coordinates>(.+)<\/coordinates>/m
+      if buffer =~ %r{<coordinates>(.+)</coordinates>}m
         Regexp.last_match[1].gsub(/\n/, ' ').strip.split(/\s+/).each do |coord|
           x, y, z = coord.split(',')
           if x.nil? || y.nil?
-            fail StandardError, 'coordinates must have at least x and y elements'
+            raise StandardError, 'coordinates must have at least x and y elements'
           end
+
           @factory.begin_geometry(SimpleFeatures::Point)
           if z.nil?
             @factory.add_point_x_y(x, y)
           else
             @factory.add_point_x_y_z(x, y, z)
-            @with_z = true unless @with_z # is the conditional even necessary
+            @with_z ||= true # is the conditional even necessary
           end
           @factory.end_geometry(@with_z)
         end
       end
-    rescue
+    rescue StandardError
       raise StandardError, 'error parsing coordinates: check your kml for errors'
     end
   end
