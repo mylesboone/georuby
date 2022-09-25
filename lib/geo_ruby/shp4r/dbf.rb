@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Uses the dbf lib, Copyright 2006 Keith Morrison (http://infused.org)
 # Modified to work as external gem now
 require 'rubygems'
@@ -20,15 +22,15 @@ module GeoRuby
         end
       end
 
-      class Field < Column::Base
-        def initialize(name, type, length, decimal = 0, version = 1, enc = nil)
-          super(name, type, length, decimal, version, enc)
-        end
-      end
+      # class Field < Column::Base
+      #  def initialize(name, type, length, decimal = 0, version = 1, enc = nil)
+      #    super(name, type, length, decimal, version, enc)
+      #  end
+      # end
 
       # Main DBF File Reader
       class Reader < Table
-        alias_method :fields, :columns
+        alias fields columns
         def header_length
           @columns_count
         end
